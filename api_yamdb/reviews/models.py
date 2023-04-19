@@ -158,7 +158,7 @@ class Comments(models.Model):
     title = models.ForeignKey(
         Titles,  # моделька для titles еще не написана, доработать как увижу
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='comments'
     )
     reviews = models.ForeignKey(
         Reviews,
