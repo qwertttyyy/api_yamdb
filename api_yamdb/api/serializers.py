@@ -14,14 +14,16 @@ class TokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'confirmation_code')
+        fields = ('username', ) # 'confirmation_code'
         extra_kwargs = {'username': {'validators': []}}
 
     def validate(self, data):
         username = data['username']
         user = get_object_or_404(User, username=username)
-        if user.confirmation_code != data['confirmation_code']:
-            raise serializers.ValidationError('Неверный код подтверждения.')
+        # будет в ближайшей фиче проверка с конфирм кодом, пока так токен можно получить
+        # if user.confirmation_code != data['confirmation_code']:
+            # raise serializers.ValidationError('Неверный код подтверждения.')
+
         return data
 
 
