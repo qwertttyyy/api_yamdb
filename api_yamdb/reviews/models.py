@@ -113,7 +113,7 @@ class Categories(models.Model):
         return self.name[:15]
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """Описывает модель для хранения групп произведений."""
 
     name = models.CharField(max_length=256)
@@ -136,7 +136,7 @@ class Titles(models.Model):
         return self.name[:15]
 
 
-class Reviews(models.Model):
+class Review(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
         User,
@@ -144,7 +144,7 @@ class Reviews(models.Model):
         related_name='reviews',
     )
     title = models.ForeignKey(
-        Titles,  # моделька для titles еще не написана, доработать как увижу
+        Title,  # моделька для titles еще не написана, доработать как увижу
         on_delete=models.CASCADE,
         related_name='reviews',
     )
@@ -161,7 +161,7 @@ class Reviews(models.Model):
         return self.text[:15]
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
         User,
@@ -169,7 +169,7 @@ class Comments(models.Model):
         related_name='comments',
     )
     title = models.ForeignKey(
-        Titles,  # моделька для titles еще не написана, доработать как увижу
+        Title,
         on_delete=models.CASCADE,
         related_name='comments',
     )
