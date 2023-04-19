@@ -10,11 +10,11 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genres.objects,
-        many=True
+        many=True,
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Categories.objects
+        queryset=Categories.objects,
     )
 
     class Meta:
@@ -23,11 +23,11 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data.get('genre') not in Genres.objects.values_list(
-                'slug', flat=True
+                'slug', flat=True,
         ):
             raise serializers.ValidationError('Такого жанра нет в списке')
         if data.get('category') not in Categories.objects.values_list(
-                'slug', flat=True
+                'slug', flat=True,
         ):
             raise serializers.ValidationError('Такой категории нет в списке')
         if data.get('year') > datetime.today().year:
