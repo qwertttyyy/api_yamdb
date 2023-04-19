@@ -47,16 +47,3 @@ class IsRoleModerator(BasePermission):
         del obj
         user = request.user
         return user.is_authenticated and user.is_moderator
-
-
-class ReadOnly(BasePermission):
-    """Права доступа только чтение."""
-
-    def has_permission(self, request, view) -> bool:
-        del view
-        return request.method in SAFE_METHODS
-
-    def has_object_permission(self, request, view, obj) -> bool:
-        del view
-        del obj
-        return request.method in SAFE_METHODS
