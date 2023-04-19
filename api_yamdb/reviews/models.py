@@ -1,12 +1,12 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (
-    RegexValidator, MaxValueValidator, MinValueValidator
-)
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 
 class User(AbstractUser):
     """Класс пользователя переопределенный."""
+
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
@@ -27,20 +27,22 @@ class User(AbstractUser):
         verbose_name='Имя пользователя',
         unique=True,
         db_index=True,
-        validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
-            message='Имя пользователя содержит недопустимый символ'
-        )]
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Имя пользователя содержит недопустимый символ',
+            ),
+        ],
     )
     first_name = models.CharField(
         max_length=150,
         verbose_name='имя',
-        blank=True
+        blank=True,
     )
     last_name = models.CharField(
         max_length=150,
         verbose_name='фамилия',
-        blank=True
+        blank=True,
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
@@ -65,23 +67,23 @@ class User(AbstractUser):
         constraints = [
             models.UniqueConstraint(
                 fields=('username', 'email'),
-                name='unique_user'
-            )
+                name='unique_user',
+            ),
         ]
 
     def __str__(self) -> str:
         return self.username[:15]
 
     @property
-    def is_admin(self):
+    def is_admin(self) -> bool:
         return self.role == self.ADMIN or self.is_superuser
 
     @property
-    def is_moderator(self):
+    def is_moderator(self) -> bool:
         return self.role == self.MODERATOR
 
     @property
-    def is_user(self):
+    def is_user(self) -> bool:
         return self.role == self.USER
 
 
@@ -126,18 +128,15 @@ class Titles(models.Model):
 class Reviews(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews'
+        User, on_delete=models.CASCADE, related_name='reviews'
     )
     title = models.ForeignKey(
         Titles,  # моделька для titles еще не написана, доработать как увижу
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
     )
     score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)],
-        null=False
+        validators=[MinValueValidator(1), MaxValueValidator(10)], null=False
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
@@ -151,19 +150,15 @@ class Reviews(models.Model):
 class Comments(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments'
+        User, on_delete=models.CASCADE, related_name='comments'
     )
     title = models.ForeignKey(
         Titles,  # моделька для titles еще не написана, доработать как увижу
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
     )
     reviews = models.ForeignKey(
-        Reviews,
-        on_delete=models.CASCADE,
-        related_name='comments'
+        Reviews, on_delete=models.CASCADE, related_name='comments'
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
