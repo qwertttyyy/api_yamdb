@@ -1,9 +1,13 @@
+from random import randint
+
 from api.permissions import IsRoleAdmin, IsAdminModeratorAuthorOrReadOnly
-from api.serializers import (
-    TokenSerializer, UserSerializer, ReviewSerializer, CommentSerializer
+from api.serializers import (SignUpSerializer, TokenSerializer, UserSerializer,
+    TokenSerializer, UserSerializer, ReviewSerializer, CommentSerializer,
 )
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, request
+
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -24,6 +28,7 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsRoleAdmin,)
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=['GET', 'PATCH'],
@@ -31,7 +36,7 @@ class UserViewSet(viewsets.ModelViewSet):
         url_path='me',
         permission_classes=[IsAuthenticated],
     )
-    def me_page(self, request):
+    def me_page(self, request: request.Request) -> Response:
         """
         Доступ к эндпойнту users/me/.
         Информация о пользователе и возмодность редактирования
@@ -62,6 +67,44 @@ class UserViewSet(viewsets.ModelViewSet):
         AllowAny,
     ],
 )
+def signup(request):
+    """
+    Регистрация пользователя и запрос на отправку кода авторизации на почту.
+    """
+    serializer = SignUpSerializer(data=request.data)
+    email = request.data.get('email')
+    username = request.data.get('username')
+    user = User.objects.filter(email=email, username=username)
+
+    if user.exists():
+        user = user.get(email=email)
+        send_confirmation_code(user)
+        return Response(
+            {
+                'message': 'Почта занята! '
+                'Код подтверждения отправлен повторно.',
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    else:
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        username = serializer.validated_data.get('username')
+        user, _ = User.objects.get_or_create(
+            username=username,
+            email=email,
+        )
+        send_confirmation_code(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+@permission_classes(
+    [
+        AllowAny,
+    ],
+)
 def get_token(request: request.Request) -> Response:
     """
     Возвращает пользователю токен для авторизации.
@@ -74,6 +117,20 @@ def get_token(request: request.Request) -> Response:
         return Response(f'token: {access}', status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+def send_confirmation_code(user):
+    """Генерирует и отправляет код авторизации."""
+    generated_code = randint(1000000, 9999999)  # создаем код 7-значный
+    user.confirmation_code = (
+        generated_code,  # присваиваем новое значение confirmation_code
+    )
+    user.save()
+
+    subject = 'YaMDb. Код авторизации.'
+    message = f'Привет, {user}! Твой код для авторизации «{generated_code}»'
+    from_email = 'YaMDb@yamdb.com'
+    to_email = [user.email]
+    return send_mail(subject, message, from_email, to_email)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
@@ -107,3 +164,4 @@ class CommentViewSet(viewsets.ModelViewSet):
             Review,
             id=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
+

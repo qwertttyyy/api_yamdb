@@ -60,6 +60,11 @@ class User(AbstractUser):
         choices=ROLES,
         max_length=16,
     )
+    confirmation_code = models.CharField(
+        verbose_name='Код подтверждения',
+        blank=True,
+        max_length=50,
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -115,10 +120,16 @@ class Title(models.Model):
     year = models.IntegerField()
     description = models.TextField()
     genre = models.ForeignKey(
-        Genres, related_name='titles', on_delete=models.SET_NULL, null=True
+        Genres,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+        null=True,
     )
     category = models.ForeignKey(
-        Categories, related_name='titles', on_delete=models.SET_NULL, null=True
+        Categories,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+        null=True,
     )
 
     def __str__(self):
@@ -128,7 +139,9 @@ class Title(models.Model):
 class Review(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='reviews'
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews',
     )
     title = models.ForeignKey(
         Title,  # моделька для titles еще не написана, доработать как увижу
@@ -136,7 +149,8 @@ class Review(models.Model):
         related_name='reviews',
     )
     score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)], null=False
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        null=False,
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
@@ -150,7 +164,9 @@ class Review(models.Model):
 class Comment(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments'
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
     )
     title = models.ForeignKey(
         Title,
@@ -158,7 +174,9 @@ class Comment(models.Model):
         related_name='comments',
     )
     reviews = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments'
+        Reviews,
+        on_delete=models.CASCADE,
+        related_name='comments',
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 

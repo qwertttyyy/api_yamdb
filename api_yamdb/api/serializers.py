@@ -4,10 +4,19 @@ from rest_framework import serializers
 from reviews.models import User, Review, Title, Comment
 
 
-class SingUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации пользователя."""
 
-    pass
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Придумай другое имя. Кто себя называет me?',
+            )
+        return value
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -15,21 +24,23 @@ class TokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', )  # 'confirmation_code'
-        extra_kwargs = {'username': {'validators': []}}
+        fields = ('username', 'confirmation_code')
+        extra_kwargs = {
+            'username': {
+                'validators': [],
+            },
+        }
 
     def validate(self, data):
         username = data['username']
         user = get_object_or_404(User, username=username)
-        # будет в ближайшей фиче проверка с конфирм кодом, пока так токен можно получить
-        # if user.confirmation_code != data['confirmation_code']:
-            # raise serializers.ValidationError('Неверный код подтверждения.')
-
+        if user.confirmation_code != data['confirmation_code']:
+            raise serializers.ValidationError('Неверный код подтверждения.')
         return data
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели User."""
+    """Сериализатор для пользователя."""
 
     class Meta:
         model = User
