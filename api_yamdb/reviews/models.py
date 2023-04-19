@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.core.validators import (
+    RegexValidator, MaxValueValidator, MinValueValidator
+)
 from django.db import models
 
 
@@ -81,3 +83,54 @@ class User(AbstractUser):
     @property
     def is_user(self):
         return self.role == self.USER
+
+
+class Reviews(models.Model):
+    text = models.TextField(null=False)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    title = models.ForeignKey(
+        Title,  # моделька для titles еще не написана, доработать как увижу
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    score = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        null=False
+    )
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+
+    class Meta:
+        ordering = ('pub_date',)
+
+    def __str__(self):
+        return self.text[:15]
+
+
+class Comments(models.Model):
+    models.TextField(null=False)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    title = models.ForeignKey(
+        Title,  # моделька для titles еще не написана, доработать как увижу
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
+    reviews = models.ForeignKey(
+        Reviews,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+
+    class Meta:
+        ordering = ('pub_date',)
+
+    def __str__(self):
+        return self.text[:15]
