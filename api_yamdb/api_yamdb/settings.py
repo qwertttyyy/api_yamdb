@@ -13,7 +13,6 @@ ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'reviews.User'
 
-
 # Application definition
 
 # fmt: off
@@ -24,9 +23,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'django_filters',
+    'drf_spectacular',
     'rest_framework',
     'rest_framework_simplejwt',
+
     'api',
     'reviews',
 ]
@@ -95,7 +97,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'ru-ru'
+LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
