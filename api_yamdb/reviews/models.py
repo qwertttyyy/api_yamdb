@@ -118,7 +118,7 @@ class Title(models.Model):
 
     name = models.CharField(max_length=256)
     year = models.IntegerField()
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     genre = models.ForeignKey(
         Genres,
         related_name='titles',

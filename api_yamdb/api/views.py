@@ -1,9 +1,17 @@
+from rest_framework import viewsets
+
+from api.filters import TitlesFilter
+from api.permissions import IsAdminOrReadOnly
+from api.serializers import TitleSerializer
+from reviews.models import Titles
+
 from random import randint
 
 from api.permissions import IsRoleAdmin, IsAdminModeratorAuthorOrReadOnly
 from api.serializers import (SignUpSerializer, TokenSerializer, UserSerializer,
-    TokenSerializer, UserSerializer, ReviewSerializer, CommentSerializer,
-)
+                             TokenSerializer, UserSerializer, ReviewSerializer,
+                             CommentSerializer,
+                             )
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, request
@@ -14,6 +22,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import User, Title, Review
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Titles.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_class = TitlesFilter
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -82,7 +97,7 @@ def signup(request):
         return Response(
             {
                 'message': 'Почта занята! '
-                'Код подтверждения отправлен повторно.',
+                           'Код подтверждения отправлен повторно.',
             },
             status=status.HTTP_200_OK,
         )
@@ -132,6 +147,7 @@ def send_confirmation_code(user):
     to_email = [user.email]
     return send_mail(subject, message, from_email, to_email)
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
@@ -164,4 +180,3 @@ class CommentViewSet(viewsets.ModelViewSet):
             Review,
             id=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
-
