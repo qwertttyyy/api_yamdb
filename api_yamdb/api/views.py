@@ -1,19 +1,17 @@
 from random import randint
 
-from api.permissions import IsRoleAdmin, IsAdminModeratorAuthorOrReadOnly
-from api.serializers import (SignUpSerializer, TokenSerializer, UserSerializer,
-    TokenSerializer, UserSerializer, ReviewSerializer, CommentSerializer,
-)
+from api.permissions import IsAdminModeratorAuthorOrReadOnly, IsRoleAdmin
+from api.serializers import (CommentSerializer, ReviewSerializer,
+                             SignUpSerializer, TokenSerializer, UserSerializer)
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets, request
-
+from rest_framework import request, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import User, Title, Review
+from reviews.models import Review, Title, User
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -132,20 +130,17 @@ def send_confirmation_code(user):
     to_email = [user.email]
     return send_mail(subject, message, from_email, to_email)
 
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
-        title = get_object_or_404(
-            Title,
-            id=self.kwargs.get('title_id'))
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(
-            Title,
-            id=self.kwargs.get('title_id'))
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
 
 
@@ -154,14 +149,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminModeratorAuthorOrReadOnly,)
 
     def get_queryset(self):
-        review = get_object_or_404(
-            Review,
-            id=self.kwargs.get('review_id'))
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
         return review.comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            id=self.kwargs.get('review_id'))
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
-
