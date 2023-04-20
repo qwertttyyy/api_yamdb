@@ -4,6 +4,7 @@ import csv
 import django
 from django.apps import apps
 from django.core.management.base import BaseCommand
+from django.db.utils import OperationalError
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.api_yamdb.settings')
 django.setup()
@@ -32,17 +33,23 @@ class Command(BaseCommand):
             with open(file_path, 'r', encoding='utf-8') as csv_file:
                 reader = csv.reader(csv_file)
 
-                next(reader)
-
-                fields = [field.name for field in model._meta.fields]
+                fields = next(reader)
 
                 for row in reader:
                     obj = model()
                     for i, field in enumerate(fields):
-                        setattr(obj, field, row[i])
+                        if hasattr(obj, field + '_id'):
+                            setattr(obj, field + '_id', row[i])
+                        else:
+                            setattr(obj, field, row[i])
                     obj.save()
 
             self.stdout.write(self.style.SUCCESS(
                 f'Данные успешно записаны из {file_path} в {model_name}'))
         except FileNotFoundError:
-            self.stdout.write(self.style.ERROR(f'Файл {file_name} не найден'))
+            self.stdout.write(self.style.ERROR(f'Файл {file_name} не найден.'))
+        except OperationalError:
+            self.stdout.write(self.style.ERROR(
+                'Вы попытались заполнить таблицу со '
+                'связанным полем, но не заполнили внешнюю.'
+            ))
