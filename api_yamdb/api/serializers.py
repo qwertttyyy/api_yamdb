@@ -2,7 +2,7 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import User, Review, Title, Comment, Titles, Genres, Categories
+from reviews.models import User, Review, Title, Comment, Title, Genres, Categories
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class TitleSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Titles
+        model = Title
         fields = '__all__'
 
     def validate(self, data):

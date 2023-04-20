@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from api.filters import TitlesFilter
 from api.permissions import IsAdminOrReadOnly
 from api.serializers import TitleSerializer
-from reviews.models import Titles
+from reviews.models import Title
 
 from random import randint
 
@@ -24,7 +24,7 @@ from reviews.models import Review, Title, User
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
+    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_class = TitlesFilter
