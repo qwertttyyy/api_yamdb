@@ -1,12 +1,12 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (
-    RegexValidator, MaxValueValidator, MinValueValidator
-)
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 
 class User(AbstractUser):
     """Класс пользователя переопределенный."""
+
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
@@ -27,20 +27,22 @@ class User(AbstractUser):
         verbose_name='Имя пользователя',
         unique=True,
         db_index=True,
-        validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
-            message='Имя пользователя содержит недопустимый символ'
-        )]
+        validators=[
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Имя пользователя содержит недопустимый символ',
+            ),
+        ],
     )
     first_name = models.CharField(
         max_length=150,
         verbose_name='имя',
-        blank=True
+        blank=True,
     )
     last_name = models.CharField(
         max_length=150,
         verbose_name='фамилия',
-        blank=True
+        blank=True,
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
@@ -58,6 +60,11 @@ class User(AbstractUser):
         choices=ROLES,
         max_length=16,
     )
+    confirmation_code = models.CharField(
+        verbose_name='Код подтверждения',
+        blank=True,
+        max_length=50,
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -65,23 +72,23 @@ class User(AbstractUser):
         constraints = [
             models.UniqueConstraint(
                 fields=('username', 'email'),
-                name='unique_user'
-            )
+                name='unique_user',
+            ),
         ]
 
     def __str__(self) -> str:
         return self.username[:15]
 
     @property
-    def is_admin(self):
+    def is_admin(self) -> bool:
         return self.role == self.ADMIN or self.is_superuser
 
     @property
-    def is_moderator(self):
+    def is_moderator(self) -> bool:
         return self.role == self.MODERATOR
 
     @property
-    def is_user(self):
+    def is_user(self) -> bool:
         return self.role == self.USER
 
 
@@ -106,38 +113,44 @@ class Categories(models.Model):
         return self.name[:15]
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """Описывает модель для хранения групп произведений."""
 
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(null=True, blank=True)
     genre = models.ForeignKey(
-        Genres, related_name='titles', on_delete=models.SET_NULL, null=True
+        Genres,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+        null=True,
     )
     category = models.ForeignKey(
-        Categories, related_name='titles', on_delete=models.SET_NULL, null=True
+        Categories,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+        null=True,
     )
 
     def __str__(self):
         return self.name[:15]
 
 
-class Reviews(models.Model):
+class Review(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
     )
     title = models.ForeignKey(
-        Titles,  # моделька для titles еще не написана, доработать как увижу
+        Title,  # моделька для titles еще не написана, доработать как увижу
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
     )
     score = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
-        null=False
+        null=False,
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
@@ -148,22 +161,22 @@ class Reviews(models.Model):
         return self.text[:15]
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     text = models.TextField(null=False)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
     )
     title = models.ForeignKey(
-        Titles,  # моделька для titles еще не написана, доработать как увижу
+        Title,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
     )
     reviews = models.ForeignKey(
-        Reviews,
+        Review,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
