@@ -50,12 +50,12 @@
 1. Загрузка данных в базу:
 
     ```bash
-    python manage.py help writecsv &&
-    python manage.py writecsv reviews.Title titles &&
+    cd api_yamdb &&
     python manage.py writecsv reviews.Genre genre &&
-    python manage.py writecsv reviews.Users users &&
-    python manage.py writecsv reviews.TitleGenre genre_title &&
     python manage.py writecsv reviews.Category category &&
+    python manage.py writecsv reviews.Title titles &&
+    python manage.py writecsv reviews.TitleGenre genre_title &&
+    python manage.py writecsv reviews.User users &&
     python manage.py writecsv reviews.Review review &&
     python manage.py writecsv reviews.Comment comments
     ```
@@ -75,4 +75,3 @@
 ## **Примеры запросов API**
 
 Полная документация доступна по ссылке <http://127.0.0.1:8000/doc/> после запуска проекта.
-
