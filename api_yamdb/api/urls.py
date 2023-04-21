@@ -1,4 +1,4 @@
-from .views import TitleViewSet
+from .views import TitleViewSet, GenreViewSet, CategoryViewSet
 
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
@@ -19,7 +19,8 @@ router_v1.register(
 )
 
 router_v1.register(r'titles', TitleViewSet)
-
+router_v1.register(r'genres', GenreViewSet)
+router_v1.register(r'categories', CategoryViewSet)
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
