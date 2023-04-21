@@ -92,8 +92,6 @@ class User(AbstractUser):
         return self.role == self.USER
 
 
-
-
 class Category(models.Model):
     """Описывает модель для хранения групп категорий."""
 
@@ -105,6 +103,7 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name[:15]
+
 
 class Genre(models.Model):
     """Описывает модель для хранения групп жанров."""
@@ -126,6 +125,7 @@ class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(null=True, blank=True)
+    rating = models.IntegerField(null=True)
     genre = models.ManyToManyField(Genre, null=True, through='TitleGenre')
     category = models.ForeignKey(
         Category,

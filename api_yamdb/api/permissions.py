@@ -4,15 +4,23 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         del view
-        if request.method in SAFE_METHODS:
-            return True
-
-        return request.user.is_admin
+        user = request.user
+        if user.is_authenticated:
+            if user.is_admin or user.is_superuser:
+                return True
+            elif request.method in SAFE_METHODS:
+                return True
+        else:
+            if request.method in SAFE_METHODS:
+                return True
 
     def has_object_permission(self, request, view, obj):
         del view
         del obj
-        return request.user.is_admin
+        user = request.user
+        return request.method in SAFE_METHODS or (
+                user.is_authenticated and request.user.is_admin
+        )
 
 
 class IsAuthorOrReadOnly(BasePermission):
@@ -22,7 +30,7 @@ class IsAuthorOrReadOnly(BasePermission):
         del view
         user = request.user
         return (
-            user.is_authenticated and user.is_user or request.method in SAFE_METHODS
+                user.is_authenticated and user.is_user or request.method in SAFE_METHODS
         )
 
     def has_object_permission(self, request, view, obj) -> bool:
@@ -83,7 +91,7 @@ class IsAdminModeratorAuthorOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         del view
         return (
-            request.method in SAFE_METHODS or request.user.is_authenticated
+                request.method in SAFE_METHODS or request.user.is_authenticated
         )
 
     def has_object_permission(self, request, view, obj):
