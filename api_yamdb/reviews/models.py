@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -22,17 +21,11 @@ class User(AbstractUser):
         if self.is_superuser:
             self.role = self.ADMIN
 
-    username = models.CharField(
+    username = models.SlugField(
         max_length=150,
         verbose_name='Имя пользователя',
         unique=True,
         db_index=True,
-        validators=[
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message='Имя пользователя содержит недопустимый символ',
-            ),
-        ],
     )
     first_name = models.CharField(
         max_length=150,

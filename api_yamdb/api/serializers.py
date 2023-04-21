@@ -1,8 +1,10 @@
 from datetime import datetime
+
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import User, Review, Comment, Title, Genre, Category
+
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -31,9 +33,17 @@ class ReadTitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'  # ('name', 'year', 'description', 'genre', 'category',)
+        fields = (
+            '__all__'  # ('name', 'year', 'description', 'genre', 'category',)
+        )
         read_only_fields = (
-            'id', 'name', 'year', 'description', 'genre', 'rating', 'category',
+            'id',
+            'name',
+            'year',
+            'description',
+            'genre',
+            'rating',
+            'category',
         )
 
 
@@ -60,15 +70,18 @@ class TitleSerializer(serializers.ModelSerializer):
             for genre in genres:
                 if genre not in Genre.objects.all():
                     raise serializers.ValidationError(
-                        'Такого жанра нет в списке')
+                        'Такого жанра нет в списке'
+                    )
 
             if data.get('category') not in Category.objects.all():
                 raise serializers.ValidationError(
-                    'Такой категории нет в списке')
+                    'Такой категории нет в списке'
+                )
 
             if data.get('year') > datetime.today().year:
                 raise serializers.ValidationError(
-                    'Это произведение ещё не вышло')
+                    'Это произведение ещё не вышло'
+                )
             return data
         return data
 
@@ -161,8 +174,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         title_id = self.context.get('view').kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
         if (
-                request.method == 'POST'
-                and Review.objects.filter(title=title, author=author).exists()
+            request.method == 'POST'
+            and Review.objects.filter(title=title, author=author).exists()
         ):
             raise ValidationError('Может существовать только один отзыв!')
         return data

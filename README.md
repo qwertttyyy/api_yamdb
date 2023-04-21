@@ -47,6 +47,19 @@
     python3 api_yamdb/manage.py migrate
     ```
 
+1. Загрузка данных в базу:
+
+    ```bash
+    python manage.py help writecsv &&
+    python manage.py writecsv reviews.Title titles &&
+    python manage.py writecsv reviews.Genre genre &&
+    python manage.py writecsv reviews.Users users &&
+    python manage.py writecsv reviews.TitleGenre genre_title &&
+    python manage.py writecsv reviews.Category category &&
+    python manage.py writecsv reviews.Review review &&
+    python manage.py writecsv reviews.Comment comments
+    ```
+
 1. Создайте superuser:
 
     ```bash

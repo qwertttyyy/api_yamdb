@@ -5,21 +5,17 @@ class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         del view
         user = request.user
-        if user.is_authenticated:
-            if user.is_admin or user.is_superuser:
-                return True
-            elif request.method in SAFE_METHODS:
-                return True
-        else:
-            if request.method in SAFE_METHODS:
-                return True
+        return (
+            user.is_admin
+            or user.is_superuser
+            or request.method in SAFE_METHODS
+        )
 
     def has_object_permission(self, request, view, obj):
         del view
         del obj
-        user = request.user
         return request.method in SAFE_METHODS or (
-                user.is_authenticated and request.user.is_admin
+            request.user.is_authenticated and request.user.is_admin
         )
 
 
@@ -30,7 +26,9 @@ class IsAuthorOrReadOnly(BasePermission):
         del view
         user = request.user
         return (
-                user.is_authenticated and user.is_user or request.method in SAFE_METHODS
+            user.is_authenticated
+            and user.is_user
+            or request.method in SAFE_METHODS
         )
 
     def has_object_permission(self, request, view, obj) -> bool:
@@ -90,15 +88,13 @@ class IsAdminModeratorAuthorOrReadOnly(BasePermission):
 
     def has_permission(self, request, view):
         del view
-        return (
-                request.method in SAFE_METHODS or request.user.is_authenticated
-        )
+        return request.method in SAFE_METHODS or request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
         del view
         return (
-                request.method in SAFE_METHODS
-                or obj.author == request.user
-                or request.user.is_moderator
-                or request.user.is_admin
+            request.method in SAFE_METHODS
+            or obj.author == request.user
+            or request.user.is_moderator
+            or request.user.is_admin
         )

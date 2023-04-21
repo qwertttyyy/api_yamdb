@@ -1,29 +1,35 @@
-from django.http import Http404
-from django_filters.rest_framework import DjangoFilterBackend
-
-from api.filters import TitleFilter
-from api.permissions import IsAdminOrReadOnly
-from api.serializers import TitleSerializer, GenreSerializer, \
-    CategorySerializer, ReadTitleSerializer
-
 from random import randint
 
-from api.permissions import IsRoleAdmin, IsAdminModeratorAuthorOrReadOnly
-from api.serializers import (SignUpSerializer, TokenSerializer, UserSerializer,
-                             TokenSerializer, UserSerializer, ReviewSerializer,
-                             CommentSerializer,
-                             )
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin
 from django.core.mail import send_mail
+from django.http import Http404
 from django.shortcuts import get_object_or_404
-from rest_framework import request, status, viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, request, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.filters import SearchFilter
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Review, Title, User, Genre, Category
+from api.filters import TitleFilter
+from api.permissions import (
+    IsAdminModeratorAuthorOrReadOnly,
+    IsAdminOrReadOnly,
+    IsRoleAdmin,
+)
+from api.serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ReadTitleSerializer,
+    ReviewSerializer,
+    SignUpSerializer,
+    TitleSerializer,
+    TokenSerializer,
+    UserSerializer,
+)
+from reviews.models import Category, Genre, Review, Title, User
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -39,8 +45,12 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSerializer
 
 
-class GetCreateDestroyViewSet(CreateModelMixin, ListModelMixin,
-                              DestroyModelMixin, viewsets.GenericViewSet):
+class GetCreateDestroyViewSet(
+    CreateModelMixin,
+    ListModelMixin,
+    DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     pass
 
 
@@ -127,8 +137,8 @@ def signup(request):
         send_confirmation_code(user)
         return Response(
             {
-                'message': 'Почта занята! '
-                           'Код подтверждения отправлен повторно.',
+                'message': 'Ты забыл свой токен? '
+                'Код подтверждения отправлен повторно.',
             },
             status=status.HTTP_200_OK,
         )
@@ -167,7 +177,9 @@ def get_token(request: request.Request) -> Response:
 def send_confirmation_code(user):
     """Генерирует и отправляет код авторизации."""
     generated_code = randint(1000000, 9999999)  # создаем код 7-значный
-    user.confirmation_code = generated_code  # присваиваем новое значение confirmation_code
+    user.confirmation_code = (
+        generated_code  # присваиваем новое значение confirmation_code
+    )
     user.save()
 
     subject = 'YaMDb. Код авторизации.'

@@ -1,5 +1,5 @@
-import os
 import csv
+import os
 
 import django
 from django.apps import apps
@@ -18,7 +18,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             'model',
-            help='Модель для которой записываются данные (appname.ModelName)'
+            help='Модель для которой записываются данные (appname.ModelName)',
         )
         parser.add_argument('csv_file', help='Имя csv файла')
 
@@ -44,12 +44,17 @@ class Command(BaseCommand):
                             setattr(obj, field, row[i])
                     obj.save()
 
-            self.stdout.write(self.style.SUCCESS(
-                f'Данные успешно записаны из {file_path} в {model_name}'))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f'Данные успешно записаны из {file_path} в {model_name}'
+                )
+            )
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(f'Файл {file_name} не найден.'))
         except OperationalError:
-            self.stdout.write(self.style.ERROR(
-                'Вы попытались заполнить таблицу со '
-                'связанным полем, но не заполнили внешнюю.'
-            ))
+            self.stdout.write(
+                self.style.ERROR(
+                    'Вы попытались заполнить таблицу со '
+                    'связанным полем, но не заполнили внешнюю.'
+                )
+            )
