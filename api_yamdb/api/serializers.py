@@ -30,6 +30,7 @@ class ReadTitleSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256)
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
+    rating = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -59,6 +60,7 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects,
     )
+    
 
     class Meta:
         model = Title

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, IntegrityError
 
 
 class User(AbstractUser):
@@ -62,6 +62,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('role',)
         constraints = [
             models.UniqueConstraint(
                 fields=('username', 'email'),
@@ -118,8 +119,7 @@ class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(null=True, blank=True)
-    rating = models.IntegerField(null=True)
-    genre = models.ManyToManyField(Genre, null=True, through='TitleGenre')
+    genre = models.ManyToManyField(Genre, blank=True, through='TitleGenre')
     category = models.ForeignKey(
         Category,
         related_name='titles',
@@ -143,7 +143,7 @@ class TitleGenre(models.Model):
 
 
 class Review(models.Model):
-    text = models.TextField(null=False)
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -161,7 +161,7 @@ class Review(models.Model):
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     class Meta:
-        ordering = ('pub_date',)
+        ordering = ('-pub_date',)
         unique_together = ('title', 'author')
 
     def __str__(self):
@@ -169,7 +169,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
-    text = models.TextField(null=False)
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
