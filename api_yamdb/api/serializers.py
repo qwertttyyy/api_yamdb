@@ -52,21 +52,24 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = '__all__'  # ('name', 'year', 'description', 'genre', 'category',)
+        fields = '__all__'
 
     def validate(self, data):
+        if not self.partial:
+            genres = data.get('genre')
+            for genre in genres:
+                if genre not in Genre.objects.all():
+                    raise serializers.ValidationError(
+                        'Такого жанра нет в списке')
 
-        genres = data.get('genre')
-        for genre in genres:
-            if genre not in Genre.objects.all():
-                raise serializers.ValidationError('Такого жанра нет в списке')
+            if data.get('category') not in Category.objects.all():
+                raise serializers.ValidationError(
+                    'Такой категории нет в списке')
 
-        if data.get('category') not in Category.objects.all():
-            raise serializers.ValidationError('Такой категории нет в списке')
-
-        if data.get('year') > datetime.today().year:
-            raise serializers.ValidationError('Это произведение ещё не вышло')
-
+            if data.get('year') > datetime.today().year:
+                raise serializers.ValidationError(
+                    'Это произведение ещё не вышло')
+            return data
         return data
 
 
