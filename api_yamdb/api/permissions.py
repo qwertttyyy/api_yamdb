@@ -1,24 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class IsAdminOrReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        del view
-        user = request.user
-        return (
-            user.is_admin
-            or user.is_superuser
-            or request.method in SAFE_METHODS
-        )
-
-    def has_object_permission(self, request, view, obj):
-        del view
-        del obj
-        return request.method in SAFE_METHODS or (
-            request.user.is_authenticated and request.user.is_admin
-        )
-
-
 class IsAuthorOrReadOnly(BasePermission):
     """Права доступа, если пользователь автор контента."""
 
@@ -26,9 +8,9 @@ class IsAuthorOrReadOnly(BasePermission):
         del view
         user = request.user
         return (
-            user.is_authenticated
-            and user.is_user
-            or request.method in SAFE_METHODS
+                user.is_authenticated
+                and user.is_user
+                or request.method in SAFE_METHODS
         )
 
     def has_object_permission(self, request, view, obj) -> bool:
@@ -93,8 +75,8 @@ class IsAdminModeratorAuthorOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         del view
         return (
-            request.method in SAFE_METHODS
-            or obj.author == request.user
-            or request.user.is_moderator
-            or request.user.is_admin
+                request.method in SAFE_METHODS
+                or obj.author == request.user
+                or request.user.is_moderator
+                or request.user.is_admin
         )
