@@ -2,19 +2,19 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import User, Review, Title, Comment, Title, Genres, Categories
+from reviews.models import User, Review, Title, Comment, Title, Genre, Category
 
 
 class TitleSerializer(serializers.ModelSerializer):
     description = serializers.CharField(required=False)
     genre = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Genres.objects,
+        queryset=Genre.objects,
         many=True,
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        queryset=Categories.objects,
+        queryset=Category.objects,
     )
 
     class Meta:
@@ -22,11 +22,11 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if data.get('genre') not in Genres.objects.values_list(
+        if data.get('genre') not in Genre.objects.values_list(
                 'slug', flat=True,
         ):
             raise serializers.ValidationError('Такого жанра нет в списке')
-        if data.get('category') not in Categories.objects.values_list(
+        if data.get('category') not in Category.objects.values_list(
                 'slug', flat=True,
         ):
             raise serializers.ValidationError('Такой категории нет в списке')
@@ -42,13 +42,31 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
+        extra_kwargs = {
+            'username': {
+                'validators': [],
+            },
+            'email': {
+                'validators': [],
+            },
+        }
 
-    def validate_username(self, value):
-        if value == 'me':
+    def validate(self, data):
+        """Запрещает пользователям присваивать себе имя me
+        и использовать повторные username и email."""
+        if data.get('username') == 'me':
             raise serializers.ValidationError(
                 'Придумай другое имя. Кто себя называет me?',
             )
-        return value
+        if User.objects.filter(username=data.get('username')):
+            raise serializers.ValidationError(
+                'Пользователь с таким username уже существует.',
+            )
+        if User.objects.filter(email=data.get('email')):
+            raise serializers.ValidationError(
+                'Пользователь с таким email уже существует.',
+            )
+        return data
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -84,13 +102,6 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
-
-    def validate_username(self, username):
-        if username in 'me':
-            raise serializers.ValidationError(
-                'Использовать имя me запрещено',
-            )
-        return username
 
 
 class ReviewSerializer(serializers.ModelSerializer):
