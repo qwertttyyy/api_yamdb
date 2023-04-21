@@ -1,5 +1,6 @@
 import csv
 import os
+from pathlib import Path
 
 import django
 from django.apps import apps
@@ -9,7 +10,8 @@ from django.db.utils import OperationalError
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.api_yamdb.settings')
 django.setup()
 
-path = r'C:\Dev\api_yamdb\api_yamdb\static\data'
+
+path = Path(__file__).resolve().parent.parent.parent.parent / 'static' / 'data'
 
 
 class Command(BaseCommand):
@@ -37,11 +39,13 @@ class Command(BaseCommand):
 
                 for row in reader:
                     obj = model()
+                    print('obj attrs', obj.__dir__())
                     for i, field in enumerate(fields):
                         if hasattr(obj, field + '_id'):
                             setattr(obj, field + '_id', row[i])
                         else:
                             setattr(obj, field, row[i])
+                    # print('obj', obj)
                     obj.save()
 
             self.stdout.write(
