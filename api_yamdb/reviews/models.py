@@ -92,22 +92,29 @@ class User(AbstractUser):
         return self.role == self.USER
 
 
-class Genres(models.Model):
+
+
+class Category(models.Model):
+    """Описывает модель для хранения групп категорий."""
+
+    name = models.CharField(max_length=265)
+    slug = models.SlugField(unique=True, max_length=50)
+
+    class Meta:
+        ordering = ('id',)
+
+    def __str__(self):
+        return self.name[:15]
+
+class Genre(models.Model):
     """Описывает модель для хранения групп жанров."""
 
     # потом перенести все числа в константы
     name = models.CharField(max_length=265)
     slug = models.SlugField(unique=True, max_length=50)
 
-    def __str__(self):
-        return self.name[:15]
-
-
-class Categories(models.Model):
-    """Описывает модель для хранения групп категорий."""
-
-    name = models.CharField(max_length=265)
-    slug = models.SlugField(unique=True, max_length=50)
+    class Meta:
+        ordering = ('id',)
 
     def __str__(self):
         return self.name[:15]
@@ -119,21 +126,27 @@ class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
     description = models.TextField(null=True, blank=True)
-    genre = models.ForeignKey(
-        Genres,
-        related_name='titles',
-        on_delete=models.SET_NULL,
-        null=True,
-    )
+    genre = models.ManyToManyField(Genre, null=True, through='TitleGenre')
     category = models.ForeignKey(
-        Categories,
+        Category,
         related_name='titles',
         on_delete=models.SET_NULL,
         null=True,
     )
 
+    class Meta:
+        ordering = ('id',)
+
     def __str__(self):
         return self.name[:15]
+
+
+class TitleGenre(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.SET_NULL, null=True)
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        db_table = 'title_genres'
 
 
 class Review(models.Model):
@@ -144,7 +157,7 @@ class Review(models.Model):
         related_name='reviews',
     )
     title = models.ForeignKey(
-        Title,  # моделька для titles еще не написана, доработать как увижу
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews',
     )
