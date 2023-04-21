@@ -79,13 +79,31 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
+        extra_kwargs = {
+            'username': {
+                'validators': [],
+            },
+            'email': {
+                'validators': [],
+            },
+        }
 
-    def validate_username(self, value):
-        if value == 'me':
+    def validate(self, data):
+        """Запрещает пользователям присваивать себе имя me
+        и использовать повторные username и email."""
+        if data.get('username') == 'me':
             raise serializers.ValidationError(
                 'Придумай другое имя. Кто себя называет me?',
             )
-        return value
+        if User.objects.filter(username=data.get('username')):
+            raise serializers.ValidationError(
+                'Пользователь с таким username уже существует.',
+            )
+        if User.objects.filter(email=data.get('email')):
+            raise serializers.ValidationError(
+                'Пользователь с таким email уже существует.',
+            )
+        return data
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -122,13 +140,6 @@ class UserSerializer(serializers.ModelSerializer):
             'bio',
             'role',
         )
-
-    def validate_username(self, username):
-        if username in 'me':
-            raise serializers.ValidationError(
-                'Использовать имя me запрещено',
-            )
-        return username
 
 
 class ReviewSerializer(serializers.ModelSerializer):
