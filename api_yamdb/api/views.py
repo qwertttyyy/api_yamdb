@@ -167,7 +167,7 @@ def get_token(request: request.Request) -> Response:
 def send_confirmation_code(user):
     """Генерирует и отправляет код авторизации."""
     generated_code = randint(1000000, 9999999)  # создаем код 7-значный
-    user.confirmation_code = generated_code
+    user.confirmation_code = generated_code  # присваиваем новое значение confirmation_code
     user.save()
 
     subject = 'YaMDb. Код авторизации.'
