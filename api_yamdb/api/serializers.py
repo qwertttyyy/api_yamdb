@@ -2,11 +2,44 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import User, Review, Title, Comment, Title, Genre, Category
+from reviews.models import User, Review, Comment, Title, Genre, Category
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=256)
+
+    class Meta:
+        model = Genre
+        lookup_field = 'slug'
+        fields = ('name', 'slug')
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=256)
+
+    class Meta:
+        model = Category
+        lookup_field = 'slug'
+        fields = ('name', 'slug')
+
+
+class ReadTitleSerializer(serializers.ModelSerializer):
+    description = serializers.CharField(required=False)
+    name = serializers.CharField(max_length=256)
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
+
+    class Meta:
+        model = Title
+        fields = '__all__'  # ('name', 'year', 'description', 'genre', 'category',)
+        read_only_fields = (
+            'id', 'name', 'year', 'description', 'genre', 'rating', 'category',
+        )
 
 
 class TitleSerializer(serializers.ModelSerializer):
     description = serializers.CharField(required=False)
+    name = serializers.CharField(max_length=256)
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects,
@@ -22,17 +55,21 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if data.get('genre') not in Genre.objects.values_list(
-                'slug', flat=True,
-        ):
-            raise serializers.ValidationError('Такого жанра нет в списке')
-        if data.get('category') not in Category.objects.values_list(
-                'slug', flat=True,
-        ):
-            raise serializers.ValidationError('Такой категории нет в списке')
-        if data.get('year') > datetime.today().year:
-            raise serializers.ValidationError('Это произведение ещё не вышло')
+        if not self.partial:
+            genres = data.get('genre')
+            for genre in genres:
+                if genre not in Genre.objects.all():
+                    raise serializers.ValidationError(
+                        'Такого жанра нет в списке')
 
+            if data.get('category') not in Category.objects.all():
+                raise serializers.ValidationError(
+                    'Такой категории нет в списке')
+
+            if data.get('year') > datetime.today().year:
+                raise serializers.ValidationError(
+                    'Это произведение ещё не вышло')
+            return data
         return data
 
 
@@ -85,6 +122,7 @@ class TokenSerializer(serializers.ModelSerializer):
         username = data['username']
         user = get_object_or_404(User, username=username)
         if user.confirmation_code != data['confirmation_code']:
+            print(user.confirmation_code, '!=', data['confirmation_code'])
             raise serializers.ValidationError('Неверный код подтверждения.')
         return data
 
