@@ -8,9 +8,9 @@ class IsAuthorOrReadOnly(BasePermission):
         del view
         user = request.user
         return (
-                user.is_authenticated
-                and user.is_user
-                or request.method in SAFE_METHODS
+            user.is_authenticated
+            and user.is_user
+            or request.method in SAFE_METHODS
         )
 
     def has_object_permission(self, request, view, obj) -> bool:
@@ -68,15 +68,15 @@ class IsAdminModeratorAuthorOrReadOnly(BasePermission):
     для остальных только чтение
     """
 
-    def has_permission(self, request, view):
+    def has_permission(self, request, view) -> bool:
         del view
         return request.method in SAFE_METHODS or request.user.is_authenticated
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view, obj) -> bool:
         del view
         return (
-                request.method in SAFE_METHODS
-                or obj.author == request.user
-                or request.user.is_moderator
-                or request.user.is_admin
+            request.method in SAFE_METHODS
+            or obj.author == request.user
+            or request.user.is_moderator
+            or request.user.is_admin
         )

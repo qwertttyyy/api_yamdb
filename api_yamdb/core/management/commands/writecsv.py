@@ -15,7 +15,7 @@ path = Path(__file__).resolve().parent.parent.parent.parent / 'static' / 'data'
 
 
 class Command(BaseCommand):
-    help = 'Записывает данные из CSV файла в базу данных'
+    """Класс для записи данных из csv файлов в базу данных."""
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -48,8 +48,8 @@ class Command(BaseCommand):
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    f'Данные успешно записаны из {file_path} в {model_name}'
-                )
+                    f'Данные успешно записаны из {file_path} в {model_name}',
+                ),
             )
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(f'Файл {file_name} не найден.'))
@@ -57,6 +57,6 @@ class Command(BaseCommand):
             self.stdout.write(
                 self.style.ERROR(
                     'Вы попытались заполнить таблицу со '
-                    'связанным полем, но не заполнили внешнюю.'
-                )
+                    'связанным полем, но не заполнили внешнюю.',
+                ),
             )

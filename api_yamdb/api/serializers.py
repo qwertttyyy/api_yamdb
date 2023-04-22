@@ -60,7 +60,6 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects,
     )
-    
 
     class Meta:
         model = Title
@@ -72,17 +71,17 @@ class TitleSerializer(serializers.ModelSerializer):
             for genre in genres:
                 if genre not in Genre.objects.all():
                     raise serializers.ValidationError(
-                        'Такого жанра нет в списке'
+                        'Такого жанра нет в списке',
                     )
 
             if data.get('category') not in Category.objects.all():
                 raise serializers.ValidationError(
-                    'Такой категории нет в списке'
+                    'Такой категории нет в списке',
                 )
 
             if data.get('year') > datetime.today().year:
                 raise serializers.ValidationError(
-                    'Это произведение ещё не вышло'
+                    'Это произведение ещё не вышло',
                 )
             return data
         return data
@@ -162,7 +161,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     title = serializers.SlugRelatedField(slug_field='name', read_only=True)
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
+        slug_field='username',
+        read_only=True,
     )
 
     def validate_score(self, value):
@@ -190,7 +190,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     review = serializers.SlugRelatedField(slug_field='text', read_only=True)
     author = serializers.SlugRelatedField(
-        slug_field='username', read_only=True
+        slug_field='username',
+        read_only=True,
     )
 
     class Meta:

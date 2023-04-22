@@ -5,7 +5,9 @@
 Данный проект выполнен совместно с двумя однокурсниками:
 <https://github.com/qwertttyyy> и <https://github.com/st1teec>
 
-Проект YaMDb собирает отзывы пользователей на произведения. Сами произведения в YaMDb не хранятся, здесь нельзя посмотреть фильм или послушать музыку.
+Проект YaMDb собирает отзывы пользователей на произведения.
+Сами произведения в YaMDb не хранятся,
+здесь нельзя посмотреть фильм или послушать музыку.
 
 ## **Технологии**
 
@@ -20,7 +22,6 @@
 |pytest-django                | 4.4.0  |
 |PyJWT                        | 2.1.0  |
 |requests                     | 2.26.0 |
-
 
 ## Запуск
 
@@ -50,14 +51,14 @@
 1. Загрузка данных в базу:
 
     ```bash
-    cd api_yamdb &&
-    python manage.py writecsv reviews.Genre genre &&
-    python manage.py writecsv reviews.Category category &&
-    python manage.py writecsv reviews.Title titles &&
-    python manage.py writecsv reviews.TitleGenre genre_title &&
-    python manage.py writecsv reviews.User users &&
-    python manage.py writecsv reviews.Review review &&
-    python manage.py writecsv reviews.Comment comments
+    cd api_yamdb && \
+        python manage.py writecsv reviews.Genre genre && \
+        python manage.py writecsv reviews.Category category && \
+        python manage.py writecsv reviews.Title titles && \
+        python manage.py writecsv reviews.TitleGenre genre_title && \
+        python manage.py writecsv reviews.User users && \
+        python manage.py writecsv reviews.Review review && \
+        python manage.py writecsv reviews.Comment comments
     ```
 
 1. Создайте superuser:
@@ -74,4 +75,5 @@
 
 ## **Примеры запросов API**
 
-Полная документация доступна по ссылке <http://127.0.0.1:8000/doc/> после запуска проекта.
+Полная документация доступна по ссылке <http://127.0.0.1:8000/doc/>
+после запуска проекта.

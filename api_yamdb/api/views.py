@@ -1,7 +1,7 @@
 from random import randint
 
-from django.db.models import Avg
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, request, status, viewsets
@@ -19,7 +19,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api.filters import TitleFilter
 from api.permissions import (
     IsAdminModeratorAuthorOrReadOnly,
-    IsRoleAdmin, ReadOnly,
+    IsRoleAdmin,
+    ReadOnly,
 )
 from api.serializers import (
     CategorySerializer,
@@ -36,7 +37,9 @@ from reviews.models import Category, Genre, Review, Title, User
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by('id')
+    queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
+        'id',
+    )
     serializer_class = TitleSerializer
     permission_classes = [IsRoleAdmin | ReadOnly]
     filterset_class = TitleFilter
@@ -141,7 +144,7 @@ def signup(request):
         return Response(
             {
                 'message': 'Ты забыл свой токен? '
-                           'Код подтверждения отправлен повторно.',
+                'Код подтверждения отправлен повторно.',
             },
             status=status.HTTP_200_OK,
         )
