@@ -1,12 +1,11 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (
-    RegexValidator, MaxValueValidator, MinValueValidator
-)
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
 class User(AbstractUser):
     """Класс пользователя переопределенный."""
+
     USER = 'user'
     MODERATOR = 'moderator'
     ADMIN = 'admin'
@@ -22,25 +21,21 @@ class User(AbstractUser):
         if self.is_superuser:
             self.role = self.ADMIN
 
-    username = models.CharField(
+    username = models.SlugField(
         max_length=150,
         verbose_name='Имя пользователя',
         unique=True,
         db_index=True,
-        validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
-            message='Имя пользователя содержит недопустимый символ'
-        )]
     )
     first_name = models.CharField(
         max_length=150,
         verbose_name='имя',
-        blank=True
+        blank=True,
     )
     last_name = models.CharField(
         max_length=150,
         verbose_name='фамилия',
-        blank=True
+        blank=True,
     )
     email = models.EmailField(
         verbose_name='Электронная почта',
@@ -58,112 +53,132 @@ class User(AbstractUser):
         choices=ROLES,
         max_length=16,
     )
+    confirmation_code = models.CharField(
+        verbose_name='Код подтверждения',
+        blank=True,
+        max_length=50,
+    )
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('role',)
         constraints = [
             models.UniqueConstraint(
                 fields=('username', 'email'),
-                name='unique_user'
-            )
+                name='unique_user',
+            ),
         ]
 
     def __str__(self) -> str:
         return self.username[:15]
 
     @property
-    def is_admin(self):
+    def is_admin(self) -> bool:
         return self.role == self.ADMIN or self.is_superuser
 
     @property
-    def is_moderator(self):
+    def is_moderator(self) -> bool:
         return self.role == self.MODERATOR
 
     @property
-    def is_user(self):
+    def is_user(self) -> bool:
         return self.role == self.USER
 
 
-class Genres(models.Model):
+class Category(models.Model):
+    """Описывает модель для хранения групп категорий."""
+
+    name = models.CharField(max_length=265)
+    slug = models.SlugField(unique=True, max_length=50)
+
+    class Meta:
+        ordering = ('id',)
+
+    def __str__(self):
+        return self.name[:15]
+
+
+class Genre(models.Model):
     """Описывает модель для хранения групп жанров."""
 
     # потом перенести все числа в константы
     name = models.CharField(max_length=265)
     slug = models.SlugField(unique=True, max_length=50)
 
-    def __str__(self):
-        return self.name[:15]
-
-
-class Categories(models.Model):
-    """Описывает модель для хранения групп категорий."""
-
-    name = models.CharField(max_length=265)
-    slug = models.SlugField(unique=True, max_length=50)
+    class Meta:
+        ordering = ('id',)
 
     def __str__(self):
         return self.name[:15]
 
 
-class Titles(models.Model):
+class Title(models.Model):
     """Описывает модель для хранения групп произведений."""
 
     name = models.CharField(max_length=256)
     year = models.IntegerField()
-    description = models.TextField()
-    genre = models.ForeignKey(
-        Genres, related_name='titles', on_delete=models.SET_NULL, null=True
-    )
+    description = models.TextField(null=True, blank=True)
+    genre = models.ManyToManyField(Genre, blank=True, through='TitleGenre')
     category = models.ForeignKey(
-        Categories, related_name='titles', on_delete=models.SET_NULL, null=True
+        Category,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+        null=True,
     )
+
+    class Meta:
+        ordering = ('id',)
 
     def __str__(self):
         return self.name[:15]
 
 
-class Reviews(models.Model):
-    text = models.TextField(null=False)
+class TitleGenre(models.Model):
+    title = models.ForeignKey(Title, on_delete=models.SET_NULL, null=True)
+    genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        db_table = 'title_genres'
+
+
+class Review(models.Model):
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
     )
     title = models.ForeignKey(
-        Titles,  # моделька для titles еще не написана, доработать как увижу
+        Title,
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
     )
     score = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
-        null=False
+        null=False,
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     class Meta:
-        ordering = ('pub_date',)
+        ordering = ('-pub_date',)
+        unique_together = ('title', 'author')
 
     def __str__(self):
         return self.text[:15]
 
 
-class Comments(models.Model):
-    text = models.TextField(null=False)
+class Comment(models.Model):
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
     )
-    title = models.ForeignKey(
-        Titles,  # моделька для titles еще не написана, доработать как увижу
+    review = models.ForeignKey(
+        Review,
         on_delete=models.CASCADE,
-        related_name='comments'
-    )
-    reviews = models.ForeignKey(
-        Reviews,
-        on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
