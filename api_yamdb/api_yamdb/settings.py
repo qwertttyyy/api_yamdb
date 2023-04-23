@@ -142,3 +142,11 @@ SIMPLE_JWT = {
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+
+DOMAIN_NAME = 'yamdb.com'
+
+FROM_EMAIL = f'YaMDb@{DOMAIN_NAME}'
+
+# CONST
+
+DEFAULT_SHOWING_SYMBOLS = 15

@@ -93,31 +93,24 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
-        extra_kwargs = {
-            'username': {
-                'validators': [],
-            },
-            'email': {
-                'validators': [],
-            },
-        }
 
-    def validate(self, data):
-        """Запрещает пользователям присваивать себе имя me
-        и использовать повторные username и email."""
-        if data.get('username') == 'me':
+    def validate_username(self, value):
+        if value == 'me':
             raise serializers.ValidationError(
                 'Придумай другое имя. Кто себя называет me?',
             )
-        if User.objects.filter(username=data.get('username')):
+        elif User.objects.filter(username=value):
             raise serializers.ValidationError(
                 'Пользователь с таким username уже существует.',
             )
-        if User.objects.filter(email=data.get('email')):
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value):
             raise serializers.ValidationError(
                 'Пользователь с таким email уже существует.',
             )
-        return data
+        return value
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -136,7 +129,6 @@ class TokenSerializer(serializers.ModelSerializer):
         username = data['username']
         user = get_object_or_404(User, username=username)
         if user.confirmation_code != data['confirmation_code']:
-            print(user.confirmation_code, '!=', data['confirmation_code'])
             raise serializers.ValidationError('Неверный код подтверждения.')
         return data
 
