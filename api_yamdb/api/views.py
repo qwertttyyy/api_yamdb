@@ -1,5 +1,4 @@
-from random import randint
-
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -33,6 +32,7 @@ from api.serializers import (
     TokenSerializer,
     UserSerializer,
 )
+from api_yamdb.settings import FROM_EMAIL
 from reviews.models import Category, Genre, Review, Title, User
 
 
@@ -114,13 +114,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 data=request.data,
                 partial=True,
             )
-            if serializer.is_valid():
-                serializer.save(role=request.user.role)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(role=request.user.role)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -148,17 +144,15 @@ def signup(request):
             },
             status=status.HTTP_200_OK,
         )
-
-    else:
-        serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data.get('email')
-        username = serializer.validated_data.get('username')
-        user, _ = User.objects.get_or_create(
-            username=username,
-            email=email,
-        )
-        send_confirmation_code(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer.is_valid(raise_exception=True)
+    email = serializer.validated_data.get('email')
+    username = serializer.validated_data.get('username')
+    user, _ = User.objects.get_or_create(
+        username=username,
+        email=email,
+    )
+    send_confirmation_code(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -172,17 +166,16 @@ def get_token(request: request.Request) -> Response:
     Возвращает пользователю токен для авторизации.
     """
     serializer = TokenSerializer(data=request.data)
-    if serializer.is_valid():
-        username = serializer.validated_data.get('username')
-        user = get_object_or_404(User, username=username)
-        access = AccessToken.for_user(user)
-        return Response(f'token: {access}', status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    username = serializer.validated_data.get('username')
+    user = get_object_or_404(User, username=username)
+    access = AccessToken.for_user(user)
+    return Response(f'token: {access}', status=status.HTTP_200_OK)
 
 
 def send_confirmation_code(user):
     """Генерирует и отправляет код авторизации."""
-    generated_code = randint(1000000, 9999999)  # создаем код 7-значный
+    generated_code = default_token_generator.make_token(user)
     user.confirmation_code = (
         generated_code  # присваиваем новое значение confirmation_code
     )
@@ -190,7 +183,7 @@ def send_confirmation_code(user):
 
     subject = 'YaMDb. Код авторизации.'
     message = f'Привет, {user}! Твой код для авторизации «{generated_code}»'
-    from_email = 'YaMDb@yamdb.com'
+    from_email = FROM_EMAIL
     to_email = [user.email]
     return send_mail(subject, message, from_email, to_email)
 

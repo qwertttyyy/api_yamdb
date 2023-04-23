@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from api_yamdb.settings import DEFAULT_SHOWING_SYMBOLS
+
 
 class User(AbstractUser):
     """Класс пользователя переопределенный."""
@@ -71,7 +73,7 @@ class User(AbstractUser):
         ]
 
     def __str__(self) -> str:
-        return self.username[:15]
+        return self.username[:DEFAULT_SHOWING_SYMBOLS]
 
     @property
     def is_admin(self) -> bool:
@@ -96,7 +98,7 @@ class Category(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return self.name[:15]
+        return self.name[:DEFAULT_SHOWING_SYMBOLS]
 
 
 class Genre(models.Model):
@@ -110,7 +112,7 @@ class Genre(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return self.name[:15]
+        return self.name[:DEFAULT_SHOWING_SYMBOLS]
 
 
 class Title(models.Model):
@@ -131,7 +133,7 @@ class Title(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return self.name[:15]
+        return self.name[:DEFAULT_SHOWING_SYMBOLS]
 
 
 class TitleGenre(models.Model):
@@ -165,7 +167,7 @@ class Review(models.Model):
         unique_together = ('title', 'author')
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:DEFAULT_SHOWING_SYMBOLS]
 
 
 class Comment(models.Model):
@@ -186,4 +188,4 @@ class Comment(models.Model):
         ordering = ('pub_date',)
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:DEFAULT_SHOWING_SYMBOLS]
