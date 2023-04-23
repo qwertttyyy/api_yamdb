@@ -166,11 +166,11 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate_score(self, value):
-        if 0 > value > 10:
+        if value < 0 or value > 10:
             raise serializers.ValidationError('Оценка по 10-бальной шкале!')
         return value
 
-    def validate(self, data):
+    def validate_review_uniqueness(self, data):
         request = self.context['request']
         author = request.user
         title_id = self.context.get('view').kwargs.get('title_id')
@@ -180,6 +180,11 @@ class ReviewSerializer(serializers.ModelSerializer):
             and Review.objects.filter(title=title, author=author).exists()
         ):
             raise ValidationError('Может существовать только один отзыв!')
+        return data
+
+    def validate(self, data):
+        self.validate_score(data['score'])
+        self.validate_review_uniqueness(data)
         return data
 
     class Meta:
