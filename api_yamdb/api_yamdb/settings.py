@@ -139,6 +139,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
+# CONST
+
 DEFAULT_SHOWING_SYMBOLS = 15
 MAX_LENGTH_SLUG = 50
 MAX_LENGTH_NAME = 256
+DOMAIN_NAME = 'yamdb.com'
+FROM_EMAIL = f'YaMDb@{DOMAIN_NAME}'

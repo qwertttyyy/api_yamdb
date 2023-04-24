@@ -74,7 +74,7 @@ class User(AbstractUser):
         ]
 
     def __str__(self) -> str:
-        return self.username[:15]
+        return self.username[:DEFAULT_SHOWING_SYMBOLS]
 
     @property
     def is_admin(self) -> bool:
@@ -163,47 +163,58 @@ class TitleGenre(models.Model):
 
 
 class Review(models.Model):
-    text = models.TextField()
+    text = models.TextField(verbose_name='текст отзыва')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='reviews',
+        verbose_name='автор',
     )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
+        verbose_name='произведение',
     )
     score = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(10)],
         null=False,
+        verbose_name='оценка',
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='дата публикации',
+    )
 
     class Meta:
         ordering = ('-pub_date',)
         unique_together = ('title', 'author')
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:DEFAULT_SHOWING_SYMBOLS]
 
 
 class Comment(models.Model):
-    text = models.TextField()
+    text = models.TextField(verbose_name='текст комментария')
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='comments',
+        verbose_name='автор комментария',
     )
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
         related_name='comments',
+        verbose_name='отзыв',
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    pub_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='дата публикации',
+    )
 
     class Meta:
         ordering = ('pub_date',)
 
     def __str__(self):
-        return self.text[:15]
+        return self.text[:DEFAULT_SHOWING_SYMBOLS]
