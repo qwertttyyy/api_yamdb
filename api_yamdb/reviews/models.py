@@ -2,8 +2,14 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from api_yamdb.settings import DEFAULT_SHOWING_SYMBOLS, MAX_LENGTH_NAME, \
-    MAX_LENGTH_SLUG
+from api_yamdb.settings import (
+    DEFAULT_SHOWING_SYMBOLS,
+    MAX_LENGTH,
+    MAX_LENGTH_CORE,
+    MAX_LENGTH_EMAIL,
+    MAX_LENGTH_SLUG,
+    MAX_LENGTH_USERNAME,
+)
 
 
 class User(AbstractUser):
@@ -25,53 +31,53 @@ class User(AbstractUser):
             self.role = self.ADMIN
 
     username = models.SlugField(
-        max_length=150,
+        db_index=True,
+        max_length=MAX_LENGTH_USERNAME,
         verbose_name='Имя пользователя',
         unique=True,
-        db_index=True,
     )
     first_name = models.CharField(
-        max_length=150,
-        verbose_name='имя',
         blank=True,
+        max_length=MAX_LENGTH_USERNAME,
+        verbose_name='имя',
     )
     last_name = models.CharField(
-        max_length=150,
-        verbose_name='фамилия',
         blank=True,
+        max_length=MAX_LENGTH_USERNAME,
+        verbose_name='фамилия',
     )
     email = models.EmailField(
+        max_length=MAX_LENGTH_EMAIL,
         verbose_name='Электронная почта',
         unique=True,
-        max_length=254,
     )
     bio = models.TextField(
-        verbose_name='Биография',
         blank=True,
-        max_length=250,
+        max_length=MAX_LENGTH,
+        verbose_name='Биография',
     )
     role = models.CharField(
-        verbose_name='Роль',
         default='user',
         choices=ROLES,
-        max_length=16,
+        max_length=MAX_LENGTH_CORE,
+        verbose_name='Роль',
     )
     confirmation_code = models.CharField(
-        verbose_name='Код подтверждения',
         blank=True,
-        max_length=50,
+        max_length=MAX_LENGTH_CORE,
+        verbose_name='Код подтверждения',
     )
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ('role',)
         constraints = [
             models.UniqueConstraint(
                 fields=('username', 'email'),
                 name='unique_user',
             ),
         ]
+        ordering = ('role',)
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
 
     def __str__(self) -> str:
         return self.username[:DEFAULT_SHOWING_SYMBOLS]
@@ -92,10 +98,15 @@ class User(AbstractUser):
 class Category(models.Model):
     """Описывает модель для хранения групп категорий."""
 
-    name = models.CharField(max_length=MAX_LENGTH_NAME,
-                            verbose_name='Название')
-    slug = models.SlugField(unique=True, max_length=MAX_LENGTH_SLUG,
-                            verbose_name='Слаг')
+    name = models.CharField(
+        max_length=MAX_LENGTH,
+        verbose_name='Название',
+    )
+    slug = models.SlugField(
+        unique=True,
+        max_length=MAX_LENGTH_SLUG,
+        verbose_name='Слаг',
+    )
 
     class Meta:
         ordering = ('id',)
@@ -107,10 +118,15 @@ class Category(models.Model):
 class Genre(models.Model):
     """Описывает модель для хранения групп жанров."""
 
-    name = models.CharField(max_length=MAX_LENGTH_NAME,
-                            verbose_name='Название')
-    slug = models.SlugField(unique=True, max_length=MAX_LENGTH_SLUG,
-                            verbose_name='Слаг')
+    name = models.CharField(
+        max_length=MAX_LENGTH,
+        verbose_name='Название',
+    )
+    slug = models.SlugField(
+        unique=True,
+        max_length=MAX_LENGTH_SLUG,
+        verbose_name='Слаг',
+    )
 
     class Meta:
         ordering = ('id',)
@@ -122,27 +138,31 @@ class Genre(models.Model):
 class Title(models.Model):
     """Описывает модель для хранения групп произведений."""
 
-    name = models.CharField(max_length=MAX_LENGTH_NAME,
-                            verbose_name='Название')
+    name = models.CharField(
+        max_length=MAX_LENGTH,
+        verbose_name='Название',
+    )
     year = models.PositiveIntegerField(
-        verbose_name='Год выпуска', db_index=True,
+        verbose_name='Год выпуска',
+        db_index=True,
     )
     description = models.TextField(
-        null=True, blank=True,
-        verbose_name='Описание'
+        null=True,
+        blank=True,
+        verbose_name='Описание',
     )
     genre = models.ManyToManyField(
         Genre,
         blank=True,
         through='TitleGenre',
-        verbose_name='Жанр'
+        verbose_name='Жанр',
     )
     category = models.ForeignKey(
         Category,
         related_name='titles',
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='Категория'
+        verbose_name='Категория',
     )
 
     class Meta:

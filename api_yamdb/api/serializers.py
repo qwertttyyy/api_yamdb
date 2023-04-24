@@ -10,6 +10,7 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанров."""
+
     name = serializers.CharField(max_length=MAX_LENGTH_NAME)
 
     class Meta:
@@ -31,6 +32,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ReadTitleSerializer(serializers.ModelSerializer):
     """Сериализатор только для чтения произведений."""
+
     description = serializers.CharField(required=False)
     name = serializers.CharField(max_length=MAX_LENGTH_NAME)
     genre = GenreSerializer(many=True)
@@ -178,7 +180,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if value < 0 or value > 10:
             raise serializers.ValidationError('Оценка по 10-бальной шкале!')
         return value
-    
+
     def validate_title(self, value):
         try:
             Title.objects.get(name=value)
