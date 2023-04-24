@@ -67,7 +67,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
-
 # Database
 
 DATABASES = {
@@ -76,7 +75,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     },
 }
-
 
 # Password validation
 
@@ -95,7 +93,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
@@ -107,7 +104,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 
@@ -143,10 +139,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 
-DOMAIN_NAME = 'yamdb.com'
-
-FROM_EMAIL = f'YaMDb@{DOMAIN_NAME}'
-
 # CONST
 
 DEFAULT_SHOWING_SYMBOLS = 15
+MAX_LENGTH_SLUG = 50
+MAX_LENGTH_NAME = 256
+DOMAIN_NAME = 'yamdb.com'
+FROM_EMAIL = f'YaMDb@{DOMAIN_NAME}'

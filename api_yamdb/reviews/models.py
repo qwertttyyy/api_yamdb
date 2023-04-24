@@ -2,7 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from api_yamdb.settings import DEFAULT_SHOWING_SYMBOLS
+from api_yamdb.settings import DEFAULT_SHOWING_SYMBOLS, MAX_LENGTH_NAME, \
+    MAX_LENGTH_SLUG
 
 
 class User(AbstractUser):
@@ -91,8 +92,10 @@ class User(AbstractUser):
 class Category(models.Model):
     """Описывает модель для хранения групп категорий."""
 
-    name = models.CharField(max_length=265)
-    slug = models.SlugField(unique=True, max_length=50)
+    name = models.CharField(max_length=MAX_LENGTH_NAME,
+                            verbose_name='Название')
+    slug = models.SlugField(unique=True, max_length=MAX_LENGTH_SLUG,
+                            verbose_name='Слаг')
 
     class Meta:
         ordering = ('id',)
@@ -104,9 +107,10 @@ class Category(models.Model):
 class Genre(models.Model):
     """Описывает модель для хранения групп жанров."""
 
-    # потом перенести все числа в константы
-    name = models.CharField(max_length=265)
-    slug = models.SlugField(unique=True, max_length=50)
+    name = models.CharField(max_length=MAX_LENGTH_NAME,
+                            verbose_name='Название')
+    slug = models.SlugField(unique=True, max_length=MAX_LENGTH_SLUG,
+                            verbose_name='Слаг')
 
     class Meta:
         ordering = ('id',)
@@ -118,25 +122,39 @@ class Genre(models.Model):
 class Title(models.Model):
     """Описывает модель для хранения групп произведений."""
 
-    name = models.CharField(max_length=256)
-    year = models.IntegerField()
-    description = models.TextField(null=True, blank=True)
-    genre = models.ManyToManyField(Genre, blank=True, through='TitleGenre')
+    name = models.CharField(max_length=MAX_LENGTH_NAME,
+                            verbose_name='Название')
+    year = models.PositiveIntegerField(
+        verbose_name='Год выпуска', db_index=True,
+    )
+    description = models.TextField(
+        null=True, blank=True,
+        verbose_name='Описание'
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        blank=True,
+        through='TitleGenre',
+        verbose_name='Жанр'
+    )
     category = models.ForeignKey(
         Category,
         related_name='titles',
         on_delete=models.SET_NULL,
         null=True,
+        verbose_name='Категория'
     )
 
     class Meta:
-        ordering = ('id',)
+        ordering = ('name',)
 
     def __str__(self):
         return self.name[:DEFAULT_SHOWING_SYMBOLS]
 
 
 class TitleGenre(models.Model):
+    """Описывает связующую модель для привязки жанров к произведениям."""
+
     title = models.ForeignKey(Title, on_delete=models.SET_NULL, null=True)
     genre = models.ForeignKey(Genre, on_delete=models.SET_NULL, null=True)
 
