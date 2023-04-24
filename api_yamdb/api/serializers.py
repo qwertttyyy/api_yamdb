@@ -158,18 +158,24 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate_score(self, value):
-        if 0 > value > 10:
+        if value < 0 or value > 10:
             raise serializers.ValidationError('Оценка по 10-бальной шкале!')
+        return value
+    
+    def validate_title(self, value):
+        try:
+            Title.objects.get(name=value)
+        except Title.DoesNotExist:
+            raise serializers.ValidationError('Произведение не найдено.')
         return value
 
     def validate(self, data):
         request = self.context['request']
         author = request.user
-        title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
+        title_id = title_id = self.context.get('view').kwargs.get('title_id')
         if (
             request.method == 'POST'
-            and Review.objects.filter(title=title, author=author).exists()
+            and Review.objects.filter(title=title_id, author=author).exists()
         ):
             raise ValidationError('Может существовать только один отзыв!')
         return data
