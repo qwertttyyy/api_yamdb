@@ -4,14 +4,14 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from api_yamdb.settings import MAX_LENGTH_NAME
+from api_yamdb.settings import MAX_LENGTH
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор для жанров."""
 
-    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
+    name = serializers.CharField(max_length=MAX_LENGTH)
 
     class Meta:
         model = Genre
@@ -22,7 +22,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор для категорий."""
 
-    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
+    name = serializers.CharField(max_length=MAX_LENGTH)
 
     class Meta:
         model = Category
@@ -34,7 +34,7 @@ class ReadTitleSerializer(serializers.ModelSerializer):
     """Сериализатор только для чтения произведений."""
 
     description = serializers.CharField(required=False)
-    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
+    name = serializers.CharField(max_length=MAX_LENGTH)
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     rating = serializers.IntegerField()
@@ -59,7 +59,7 @@ class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор для произведений."""
 
     description = serializers.CharField(required=False)
-    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
+    name = serializers.CharField(max_length=MAX_LENGTH)
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects,
