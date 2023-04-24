@@ -37,6 +37,8 @@ from reviews.models import Category, Genre, Review, Title, User
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для обработки произведений."""
+
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
         'id',
     )
@@ -57,10 +59,15 @@ class GetCreateDestroyViewSet(
     DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
+    """Создание базового вьюсета, который обрабатывает запросы на
+     получение списка всех объектов, создание и удаление."""
+
     pass
 
 
 class GenreViewSet(GetCreateDestroyViewSet):
+    """Вьюсет для обработки жанров."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = [IsRoleAdmin | ReadOnly]
@@ -70,6 +77,8 @@ class GenreViewSet(GetCreateDestroyViewSet):
 
 
 class CategoryViewSet(GetCreateDestroyViewSet):
+    """Вьюсет для обработки категорий."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [IsRoleAdmin | ReadOnly]
@@ -144,7 +153,7 @@ def signup(request):
         return Response(
             {
                 'message': 'Ты забыл свой токен? '
-                'Код подтверждения отправлен повторно.',
+                           'Код подтверждения отправлен повторно.',
             },
             status=status.HTTP_200_OK,
         )

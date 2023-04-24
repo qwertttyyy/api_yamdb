@@ -4,11 +4,13 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from api_yamdb.settings import MAX_LENGTH_NAME
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256)
+    """Сериализатор для жанров."""
+    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
 
     class Meta:
         model = Genre
@@ -17,7 +19,9 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256)
+    """Сериализатор для категорий."""
+
+    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
 
     class Meta:
         model = Category
@@ -26,8 +30,9 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class ReadTitleSerializer(serializers.ModelSerializer):
+    """Сериализатор только для чтения произведений."""
     description = serializers.CharField(required=False)
-    name = serializers.CharField(max_length=256)
+    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
     rating = serializers.IntegerField()
@@ -49,8 +54,10 @@ class ReadTitleSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор для произведений."""
+
     description = serializers.CharField(required=False)
-    name = serializers.CharField(max_length=256)
+    name = serializers.CharField(max_length=MAX_LENGTH_NAME)
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects,
@@ -65,25 +72,35 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = '__all__'
 
-    def validate(self, data):
+    def validate_genre(self, genres):
         if not self.partial:
-            genres = data.get('genre')
             for genre in genres:
                 if genre not in Genre.objects.all():
                     raise serializers.ValidationError(
                         'Такого жанра нет в списке',
                     )
+            return genres
 
-            if data.get('category') not in Category.objects.all():
+        return genres
+
+    def validate_category(self, category):
+        if not self.partial:
+            if category not in Category.objects.all():
                 raise serializers.ValidationError(
                     'Такой категории нет в списке',
                 )
+            return category
 
+        return category
+
+    def validate_year(self, data):
+        if self.partial:
             if data.get('year') > datetime.today().year:
                 raise serializers.ValidationError(
                     'Это произведение ещё не вышло',
                 )
             return data
+
         return data
 
 

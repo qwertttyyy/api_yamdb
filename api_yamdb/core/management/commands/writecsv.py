@@ -39,11 +39,11 @@ class Command(BaseCommand):
 
                 for row in reader:
                     obj = model()
-                    for i, field in enumerate(fields):
+                    for field_index, field in enumerate(fields):
                         if hasattr(obj, field + '_id'):
-                            setattr(obj, field + '_id', row[i])
+                            setattr(obj, field + '_id', row[field_index])
                         else:
-                            setattr(obj, field, row[i])
+                            setattr(obj, field, row[field_index])
                     obj.save()
 
             self.stdout.write(
