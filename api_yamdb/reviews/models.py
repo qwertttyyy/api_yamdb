@@ -2,14 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from api_yamdb.settings import (
-    DEFAULT_SHOWING_SYMBOLS,
-    MAX_LENGTH,
-    MAX_LENGTH_CORE,
-    MAX_LENGTH_EMAIL,
-    MAX_LENGTH_SLUG,
-    MAX_LENGTH_USERNAME,
-)
+from django.conf import settings
 
 
 class User(AbstractUser):
@@ -32,39 +25,39 @@ class User(AbstractUser):
 
     username = models.SlugField(
         db_index=True,
-        max_length=MAX_LENGTH_USERNAME,
+        max_length=settings.MAX_LENGTH_USERNAME,
         verbose_name='Имя пользователя',
         unique=True,
     )
     first_name = models.CharField(
         blank=True,
-        max_length=MAX_LENGTH_USERNAME,
+        max_length=settings.MAX_LENGTH_USERNAME,
         verbose_name='имя',
     )
     last_name = models.CharField(
         blank=True,
-        max_length=MAX_LENGTH_USERNAME,
+        max_length=settings.MAX_LENGTH_USERNAME,
         verbose_name='фамилия',
     )
     email = models.EmailField(
-        max_length=MAX_LENGTH_EMAIL,
+        max_length=settings.MAX_LENGTH_EMAIL,
         verbose_name='Электронная почта',
         unique=True,
     )
     bio = models.TextField(
         blank=True,
-        max_length=MAX_LENGTH,
+        max_length=settings.MAX_LENGTH,
         verbose_name='Биография',
     )
     role = models.CharField(
         default='user',
         choices=ROLES,
-        max_length=MAX_LENGTH_CORE,
+        max_length=settings.MAX_LENGTH_CORE,
         verbose_name='Роль',
     )
     confirmation_code = models.CharField(
         blank=True,
-        max_length=MAX_LENGTH_CORE,
+        max_length=settings.MAX_LENGTH_CORE,
         verbose_name='Код подтверждения',
     )
 
@@ -80,7 +73,7 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     def __str__(self) -> str:
-        return self.username[:DEFAULT_SHOWING_SYMBOLS]
+        return self.username[:settings.DEFAULT_SHOWING_SYMBOLS]
 
     @property
     def is_admin(self) -> bool:
@@ -99,12 +92,12 @@ class Category(models.Model):
     """Описывает модель для хранения групп категорий."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH,
+        max_length=settings.MAX_LENGTH,
         verbose_name='Название',
     )
     slug = models.SlugField(
         unique=True,
-        max_length=MAX_LENGTH_SLUG,
+        max_length=settings.MAX_LENGTH_SLUG,
         verbose_name='Слаг',
     )
 
@@ -112,19 +105,19 @@ class Category(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return self.name[:DEFAULT_SHOWING_SYMBOLS]
+        return self.name[:settings.DEFAULT_SHOWING_SYMBOLS]
 
 
 class Genre(models.Model):
     """Описывает модель для хранения групп жанров."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH,
+        max_length=settings.MAX_LENGTH,
         verbose_name='Название',
     )
     slug = models.SlugField(
         unique=True,
-        max_length=MAX_LENGTH_SLUG,
+        max_length=settings.MAX_LENGTH_SLUG,
         verbose_name='Слаг',
     )
 
@@ -132,14 +125,14 @@ class Genre(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return self.name[:DEFAULT_SHOWING_SYMBOLS]
+        return self.name[:settings.DEFAULT_SHOWING_SYMBOLS]
 
 
 class Title(models.Model):
     """Описывает модель для хранения групп произведений."""
 
     name = models.CharField(
-        max_length=MAX_LENGTH,
+        max_length=settings.MAX_LENGTH,
         verbose_name='Название',
     )
     year = models.PositiveIntegerField(
@@ -169,7 +162,7 @@ class Title(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name[:DEFAULT_SHOWING_SYMBOLS]
+        return self.name[:settings.DEFAULT_SHOWING_SYMBOLS]
 
 
 class TitleGenre(models.Model):
@@ -197,7 +190,10 @@ class Review(models.Model):
         verbose_name='произведение',
     )
     score = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        validators=[
+            MinValueValidator(settings.MIN_SCORE),
+            MaxValueValidator(settings.MAX_SCORE),
+        ],
         null=False,
         verbose_name='оценка',
     )
@@ -211,7 +207,7 @@ class Review(models.Model):
         unique_together = ('title', 'author')
 
     def __str__(self):
-        return self.text[:DEFAULT_SHOWING_SYMBOLS]
+        return self.text[:settings.DEFAULT_SHOWING_SYMBOLS]
 
 
 class Comment(models.Model):
@@ -237,4 +233,4 @@ class Comment(models.Model):
         ordering = ('pub_date',)
 
     def __str__(self):
-        return self.text[:DEFAULT_SHOWING_SYMBOLS]
+        return self.text[:settings.DEFAULT_SHOWING_SYMBOLS]

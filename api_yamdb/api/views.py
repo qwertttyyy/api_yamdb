@@ -32,7 +32,7 @@ from api.serializers import (
     TokenSerializer,
     UserSerializer,
 )
-from api_yamdb.settings import FROM_EMAIL
+from django.conf import settings
 from reviews.models import Category, Genre, Review, Title, User
 
 
@@ -192,7 +192,7 @@ def send_confirmation_code(user):
 
     subject = 'YaMDb. Код авторизации.'
     message = f'Привет, {user}! Твой код для авторизации «{generated_code}»'
-    from_email = FROM_EMAIL
+    from_email = settings.FROM_EMAIL
     to_email = [user.email]
     return send_mail(subject, message, from_email, to_email)
 
@@ -223,5 +223,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         return review.comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        review = get_object_or_404(
+            Review,
+            id=self.kwargs.get('review_id'),
+            title_id=self.kwargs.get('title_id'),
+        )
         serializer.save(author=self.request.user, review=review)
