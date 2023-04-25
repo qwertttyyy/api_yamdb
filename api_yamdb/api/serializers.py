@@ -1,10 +1,10 @@
 from datetime import datetime
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from django.conf import settings
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
@@ -42,7 +42,7 @@ class ReadTitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            '__all__'  # ('name', 'year', 'description', 'genre', 'category',)
+            '__all__'
         )
         read_only_fields = (
             'id',
@@ -138,11 +138,6 @@ class TokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'confirmation_code')
-        extra_kwargs = {
-            'username': {
-                'validators': [],
-            },
-        }
 
     def validate(self, data):
         username = data['username']
